@@ -168,7 +168,7 @@ public class MusicPlayer : MonoBehaviour
 
     #endregion
 
-    #region MusicPlayEvent
+    #region Update
 
     private int _bpmPlayCount;
 
@@ -262,92 +262,42 @@ public class MusicPlayer : MonoBehaviour
 
     private void PlayPiano()
     {
-        if (_musicdata.PianoDictionary[_playingMusicType].Count <= _pianoPlayCount) return;
-
-        while (_musicdata.PianoDictionary[_playingMusicType][_pianoPlayCount].Timing <= MusicPlayTime)
+        PlayInstrument(_playingMusicType, _musicdata.PianoDictionary, ref _pianoPlayCount, (bool isHigh) =>
         {
-            Managers.Instance.Game.PianoPlayEvent?.Invoke(_musicdata.PianoDictionary[_playingMusicType][_pianoPlayCount].IsHighNote);
-            //Debug.Log($"Piano || MusicTime : {_musicPlayTime}, NoteTime : {_musicdata.PianoDictionary[_playingMusicType][_pianoPlayCount].Timing}");
-
-            _pianoPlayCount++;
-
-            if (_musicdata.PianoDictionary[_playingMusicType].Count <= _pianoPlayCount)
-            {
-                break;
-            }
-        }
+            Managers.Instance.Game.PianoPlayEvent?.Invoke(isHigh);
+        });
     }
 
     private void PlayDrum()
     {
-        if (_musicdata.DrumDictionary[_playingMusicType].Count <= _drumPlayCount) return;
-
-        while (_musicdata.DrumDictionary[_playingMusicType][_drumPlayCount].Timing <= MusicPlayTime)
+        PlayInstrument(_playingMusicType, _musicdata.DrumDictionary, ref _drumPlayCount, (bool isHigh) =>
         {
-            Managers.Instance.Game.DrumPlayEvent?.Invoke(_musicdata.DrumDictionary[_playingMusicType][_drumPlayCount].IsHighNote);
-            //Debug.Log($"Drum || MusicTime : {_musicPlayTime}, NoteTime : {_musicdata.DrumDictionary[_playingMusicType][_drumPlayCount].Timing}");
-
-            _drumPlayCount++;
-
-            if (_musicdata.DrumDictionary[_playingMusicType].Count <= _drumPlayCount)
-            {
-                break;
-            }
-        }
+            Managers.Instance.Game.DrumPlayEvent?.Invoke(isHigh);
+        });
     }
          
     private void PlayGuitar()
     {
-        if (_musicdata.GuitarDictionary[_playingMusicType].Count <= _guitarPlayCount) return;
-
-        while (_musicdata.GuitarDictionary[_playingMusicType][_guitarPlayCount].Timing <= MusicPlayTime)
+        PlayInstrument(_playingMusicType, _musicdata.GuitarDictionary, ref _guitarPlayCount, (bool isHigh) =>
         {
-            Managers.Instance.Game.GuitarPlayEvent?.Invoke(_musicdata.GuitarDictionary[_playingMusicType][_guitarPlayCount].IsHighNote);
-            //Debug.Log($"Guitar || MusicTime : {_musicPlayTime}, NoteTime : {_musicdata.GuitarDictionary[_playingMusicType][_guitarPlayCount].Timing}");
-
-            _guitarPlayCount++;
-
-            if (_musicdata.GuitarDictionary[_playingMusicType].Count <= _guitarPlayCount)
-            {
-                break;
-            }
-        }
+            Managers.Instance.Game.GuitarPlayEvent?.Invoke(isHigh);
+        });
     }
 
     private void PlayViolin()
     {
-        if (_musicdata.ViolinDictionary[_playingMusicType].Count <= _violinPlayCount) return;
-
-        while (_musicdata.ViolinDictionary[_playingMusicType][_violinPlayCount].Timing <= MusicPlayTime)
+        PlayInstrument(_playingMusicType, _musicdata.ViolinDictionary, ref _violinPlayCount, (bool isHigh) =>
         {
-            Managers.Instance.Game.ViolinPlayEvent?.Invoke(_musicdata.ViolinDictionary[_playingMusicType][_violinPlayCount].IsHighNote);
-            //ebug.Log($"Violin || MusicTime : {_musicPlayTime}, NoteTime : {_musicdata.ViolinDictionary[_playingMusicType][_violinPlayCount].Timing}");
-
-            _violinPlayCount++;
-
-            if (_musicdata.ViolinDictionary[_playingMusicType].Count <= _violinPlayCount)
-            {
-                break;
-            }
-        }
+            Managers.Instance.Game.ViolinPlayEvent?.Invoke(isHigh);
+        });
     }
 
     private void PlayTrumpet()
     {
-        if (_musicdata.TrumpetDictionary[_playingMusicType].Count <= _trumpetPlayCount) return;
-
-        while (_musicdata.TrumpetDictionary[_playingMusicType][_trumpetPlayCount].Timing <= MusicPlayTime)
+        PlayInstrument(_playingMusicType, _musicdata.TrumpetDictionary, ref _trumpetPlayCount, (bool isHigh) =>
         {
-            Managers.Instance.Game.TrumpetPlayEvent?.Invoke(_musicdata.TrumpetDictionary[_playingMusicType][_trumpetPlayCount].IsHighNote);
-            //Debug.Log($"Trumpet || MusicTime : {_musicPlayTime}, NoteTime : {_musicdata.TrumpetDictionary[_playingMusicType][_trumpetPlayCount].Timing}");
-
-            _trumpetPlayCount++;
-
-            if (_musicdata.TrumpetDictionary[_playingMusicType].Count <= _trumpetPlayCount)
-            {
-                break;
-            }
-        }
+            Managers.Instance.Game.TrumpetPlayEvent?.Invoke(isHigh);
+        });
     }
 
     private void PlayVocal()
@@ -361,11 +311,26 @@ public class MusicPlayer : MonoBehaviour
                 - //마이너스
                 _musicdata.VocalDictionary[_playingMusicType][_vocalPlayCount].StartTime
                 );
-            //Debug.Log($"Vocal || MusicTime : {_musicPlayTime}, NoteTime : {_musicdata.VocalDictionary[_playingMusicType][_vocalPlayCount].StartTime}");
 
             _vocalPlayCount++;
 
             if (_musicdata.VocalDictionary[_playingMusicType].Count <= _vocalPlayCount)
+            {
+                break;
+            }
+        }
+    }
+
+    private void PlayInstrument(MusicType type, Dictionary<MusicType, List<InstrumentsNote>> dict, ref int playCount, Action<bool> action)
+    {
+        if (dict[type].Count <= playCount) return;
+
+        while (dict[type][playCount].Timing <= MusicPlayTime)
+        {
+            playCount++;
+            action?.Invoke(dict[type][playCount].IsHighNote);
+
+            if (dict[type].Count <= playCount)
             {
                 break;
             }
