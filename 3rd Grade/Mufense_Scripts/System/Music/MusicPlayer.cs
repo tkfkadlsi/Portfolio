@@ -24,10 +24,9 @@ public class MusicPlayer : MonoBehaviour
         _isPlaying = false;
     }
 
-    private IEnumerator Start()
+    private void Start()
     {
-        yield return Managers.Instance.Game.GetWaitForSeconds(2f);
-        StartMusic(MusicType.Victory);
+        PlayMusic(MusicType.Victory);
     }
 
     #region MusicGetAndSet
@@ -37,11 +36,6 @@ public class MusicPlayer : MonoBehaviour
 
     private float _unitTime;
     public float UnitTime { get { return _unitTime; } }
-
-    public void StartMusic(MusicType type)
-    {
-        PlayMusic(type);
-    }
 
     public void GetPlayableMusicList(List<Music> _musicList)
     {
@@ -58,7 +52,7 @@ public class MusicPlayer : MonoBehaviour
 
     public async Awaitable ChangeMusic(MusicType type)
     {
-        Debug.Log("∫Ø∞ÊΩ√¿€");
+        Debug.Log($"Î≥ÄÍ≤ΩÏãúÏûë : {type}");
 
         float time = MusicPlayTime;
 
@@ -159,6 +153,11 @@ public class MusicPlayer : MonoBehaviour
 
     private void PlayMusic(MusicType type)
     {
+        if(PlayingMusic != null)
+        {
+            PlayingMusic.PlayCoolDown = _musicPlayCooltime;
+        }
+
         _playingMusicType = type;
         _musicPlayer.clip = _musicdata.MusicDictionary[type].Clip;
         _musicPlayer.time = 0f;
@@ -183,9 +182,9 @@ public class MusicPlayer : MonoBehaviour
 
     private void Update()
     {
+        CoolDown();
         if(_isPlaying)
         {
-            CoolDown();
 
             BpmCheck();
 
@@ -197,6 +196,10 @@ public class MusicPlayer : MonoBehaviour
             if (PlayingMusic.IsViolinUsable) PlayViolin();
             if (PlayingMusic.IsTrumpetUsable) PlayTrumpet();
             if (PlayingMusic.IsVocalUsable) PlayVocal();
+        }
+        else
+        {
+            PlayMusic(MusicType.Katamari);
         }
     }
 
@@ -308,7 +311,7 @@ public class MusicPlayer : MonoBehaviour
         {
             Managers.Instance.Game.VocalPlayEvent?.Invoke(
                 _musicdata.VocalDictionary[_playingMusicType][_vocalPlayCount].EndTime
-                - //∏∂¿Ã≥ Ω∫
+                - //ÎßàÏù¥ÎÑàÏä§
                 _musicdata.VocalDictionary[_playingMusicType][_vocalPlayCount].StartTime
                 );
 
@@ -328,12 +331,13 @@ public class MusicPlayer : MonoBehaviour
         while (dict[type][playCount].Timing <= MusicPlayTime)
         {
             playCount++;
-            action?.Invoke(dict[type][playCount].IsHighNote);
 
             if (dict[type].Count <= playCount)
             {
                 break;
             }
+
+            action?.Invoke(dict[type][playCount].IsHighNote);
         }
     }
 
