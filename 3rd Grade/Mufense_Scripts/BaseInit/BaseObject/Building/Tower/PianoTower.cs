@@ -6,7 +6,7 @@ public class PianoTower : InstrumentsTower
     {
         base.Init();
 
-        SetInstrumentsType(TowerType.Piano);
+        SetTowerType(TowerType.Piano);
     }
 
     protected override void Enable()
@@ -30,15 +30,13 @@ public class PianoTower : InstrumentsTower
     {
         if (_stunBeat > 0) return;
         if(IsUpgrading) return;
-        if (Managers.Instance.Game.GetComponentInScene<MusicPowerData>()
-            .RemoveMusicPower(Managers.Instance.Data.TowerDatas[Type].UsingMusicPower[Level]) == false) return;
 
         if (_target == null || _target.gameObject.activeInHierarchy == false || Vector3.Distance(_target.transform.position, transform.position) > _range)
         {
             FindTarget();
         }
 
-        int rand = Random.Range(1, 5);
+        int rand = Random.Range(Level, Level + 2);
 
         ProjectileAttack pa;
 

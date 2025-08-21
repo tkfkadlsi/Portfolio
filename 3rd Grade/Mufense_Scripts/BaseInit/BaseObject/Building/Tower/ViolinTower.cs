@@ -6,7 +6,7 @@ public class ViolinTower : InstrumentsTower
     {
         base.Init();
 
-        SetInstrumentsType(TowerType.Violin);
+        SetTowerType(TowerType.Violin);
     }
 
     protected override void Enable()
@@ -30,8 +30,6 @@ public class ViolinTower : InstrumentsTower
     {
         if (_stunBeat > 0) return;
         if (IsUpgrading) return;
-        if (Managers.Instance.Game.GetComponentInScene<MusicPowerData>()
-            .RemoveMusicPower(Managers.Instance.Data.TowerDatas[Type].UsingMusicPower[Level]) == false) return;
 
         if (_target == null || _target.gameObject.activeInHierarchy == false || Vector3.Distance(_target.transform.position, transform.position) > _range)
         {

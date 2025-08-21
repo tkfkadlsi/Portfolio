@@ -23,6 +23,7 @@ public abstract class Unit : BaseObject, IHitable, IStunable, IDieable
     {
         base.Enable();
 
+        _isStun = false;
         _isDead = false;
     }
 
@@ -55,11 +56,15 @@ public abstract class Unit : BaseObject, IHitable, IStunable, IDieable
         _isStun = true;
         GetT<NavMeshAgent>().isStopped = true;
 
-        await UniTask.Delay(TimeSpan.FromSeconds(time));
+        UnitStunEffect stun = Managers.Instance.Pool.PopObject(PoolType.StunEffect, transform.position).GetComponent<UnitStunEffect>();
+        stun.SetUnit(this);
+
+        await UniTask.Delay((int)(time * 1000f));
 
         if (gameObject.activeInHierarchy == false) return;
 
         GetT<NavMeshAgent>().isStopped = false;
+        stun.PushThisObject();
         _isStun = false;
     }
 

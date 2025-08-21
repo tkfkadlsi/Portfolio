@@ -2,11 +2,17 @@ using UnityEngine;
 
 public class Core : Building
 {
-    private int _life;
+    private float _life;
 
-    public int Life { get; private set; }
+    public float Life { get { return _life; } }
 
-    public void Hit()
+    private void Start()
+    {
+        _life = 100;
+        Managers.Instance.Game.CoreHPChangeEvent?.Invoke(_life);
+    }
+
+    public void Hit(float damage)
     {
         _life--;
 
@@ -14,5 +20,7 @@ public class Core : Building
         {
             // 게임오버
         }
+         
+        Managers.Instance.Game.CoreHPChangeEvent?.Invoke(_life); 
     }
 }

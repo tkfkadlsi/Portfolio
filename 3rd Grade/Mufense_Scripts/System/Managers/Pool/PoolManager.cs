@@ -22,6 +22,9 @@ public class PoolManager : MonoBehaviour
     {
         PoolableObject po = Instantiate(PoolableObjectDictionary[type]);
         po.SetPoolType(type);
+
+        po.gameObject.SetActive(false);
+        po.transform.position = new Vector3(0, -10000f, 0);
         return po;
     }
 

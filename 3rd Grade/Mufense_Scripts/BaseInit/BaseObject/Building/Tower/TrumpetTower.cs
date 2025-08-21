@@ -6,7 +6,7 @@ public class TrumpetTower : InstrumentsTower
     {
         base.Init();
 
-        SetInstrumentsType(TowerType.Trumpet);
+        SetTowerType(TowerType.Trumpet);
     }
 
     protected override void Enable()

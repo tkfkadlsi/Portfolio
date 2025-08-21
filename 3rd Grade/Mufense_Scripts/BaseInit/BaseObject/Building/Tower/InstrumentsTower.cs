@@ -5,7 +5,6 @@ using UnityEngine.EventSystems;
 
 public abstract class InstrumentsTower : Tower, IPointerClickHandler
 {
-    public TowerType Type { get; private set; }
 
     [SerializeField] protected Vector3 _offset;
 
@@ -31,11 +30,6 @@ public abstract class InstrumentsTower : Tower, IPointerClickHandler
         }
 
         base.Disable();
-    }
-
-    protected void SetInstrumentsType(TowerType type)
-    {
-        Type = type;
     }
 
     protected override void BeatHandler()
@@ -89,14 +83,14 @@ public abstract class InstrumentsTower : Tower, IPointerClickHandler
     {
         get
         {
-            return Managers.Instance.Data.TowerDatas[Type].Range[Level];
+            return Managers.Instance.Data.TowerStatManagement.GetRange(Type, Level);
         }
     }
     protected float _damage
     {
         get
         {
-            float damage = Managers.Instance.Data.TowerDatas[Type].Damage[Level];
+            float damage = Managers.Instance.Data.TowerStatManagement.GetDamage(Type);
 
             float multiplier = 1.0f;
 

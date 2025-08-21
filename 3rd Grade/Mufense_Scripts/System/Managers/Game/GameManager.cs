@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour
 
     #region Event
 
+    public Action MusicPlayEvent;
     public Action BeatEvent;
     public Action<bool> CorePlayEvent;
     public Action<bool> PianoPlayEvent;
@@ -54,9 +55,11 @@ public class GameManager : MonoBehaviour
     public Action<float> VocalPlayEvent;
 
     public Action TowerChangeEvent;
+    public Action<float> CoreHPChangeEvent;
 
     public void ClearEvents()
     {
+        MusicPlayEvent = null;
         BeatEvent = null;
         CorePlayEvent = null;
         PianoPlayEvent = null;
@@ -78,11 +81,50 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
+    #region Mastery
+
+    public int MasteryLevel = 0;
+
+    private Dictionary<CardType, int> _selectedCardDictionary = new Dictionary<CardType, int>();
+
+    public void AddCard(CardType type)
+    {
+        if (_selectedCardDictionary.ContainsKey(type))
+        {
+            _selectedCardDictionary[type]++;
+        }
+        else
+        {
+            _selectedCardDictionary.Add(type, 1);
+        }
+    }
+
+    public int GetCardCount(CardType type)
+    {
+
+        if(_selectedCardDictionary.ContainsKey(type))
+        {
+            return _selectedCardDictionary[type];
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    #endregion
+
     public void AllClear()
     {
         _waitForSecondDictionary.Clear();
         _componentDictionary.Clear();
+        _selectedCardDictionary.Clear();
         ClearEvents();
+    }
+
+    private void Awake()
+    {
+        AllClear();
     }
 
     private void OnApplicationQuit()

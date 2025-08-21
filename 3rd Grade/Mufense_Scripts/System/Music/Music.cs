@@ -5,6 +5,7 @@ using UnityEngine;
 public class Music : ScriptableObject
 {
     public MusicType Type;
+    public string Name;
     public string Artist;
     public AudioClip Clip;
     [SerializedDictionary("Timing", "Bpm")] public SerializedDictionary<float, float> BpmTimingDictionary = new SerializedDictionary<float, float>();

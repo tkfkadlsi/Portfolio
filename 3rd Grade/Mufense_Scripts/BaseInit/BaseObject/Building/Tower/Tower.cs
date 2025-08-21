@@ -5,7 +5,7 @@ using UnityEngine;
 public abstract class Tower : Building
 {
     public int Level { get; private set; }
-
+    public TowerType Type { get; private set; }
     public bool IsUpgrading { get; private set; }
     protected int _levelUpCooldown;
 
@@ -51,15 +51,18 @@ public abstract class Tower : Building
 
             if (_levelUpCooldown == 0)
             {
-                Level++;
                 IsUpgrading = false;
-                _levelUpEffect.OffEffect();
-                _levelUpEffect.PushThisObject();
+                LevelUp();
             }
         }
     }
 
-    public void LevelUp()
+    protected void SetTowerType(TowerType type)
+    {
+        Type = type;
+    }
+
+    public void LevelUpStart()
     {
         _levelUpCooldown = 32;
         IsUpgrading = true;
@@ -68,11 +71,20 @@ public abstract class Tower : Building
         _levelUpEffect.OnEffect();
     }
 
+    private void LevelUp()
+    {
+        Level++;
+        Managers.Instance.UI.GetRootUI().GetCanvas<TowerInfoCanvas>().SyncUI(this);
+        _levelUpEffect.OffEffect();
+        _levelUpEffect.PushThisObject();
+    }
+
     public void BreakTower()
     {
         IsUpgrading = false;
         _levelUpCooldown = 0;
         Level = 1;
+        Managers.Instance.Data.TowerCountManagement.BreakTower(Type);
         GetT<PoolableObject>().PushThisObject();
     }
 }

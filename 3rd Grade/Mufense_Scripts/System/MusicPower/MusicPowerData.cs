@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class MusicPowerData : MonoBehaviour
@@ -8,40 +7,33 @@ public class MusicPowerData : MonoBehaviour
 
     private void Start()
     {
-        SetMaxMusicPower(1000);
-        AddMusicPower(500);
+        _maxMusicPower = 100;
+        _musicPower = 0;
+        SyncUI();
     }
 
     public void AddMusicPower(int value)
     {
         _musicPower += value;
-        if( _musicPower > _maxMusicPower )
+        if (_musicPower >= _maxMusicPower)
         {
-            _musicPower = _maxMusicPower;
+            _musicPower -= _maxMusicPower;
+            _maxMusicPower += 100;
+
+            MasteryLevelUp();
         }
 
-        Managers.Instance.UI.GetRootUI().GetCanvas<MusicPowerCanvas>().SetMusicPower(_musicPower);
+        SyncUI();
     }
 
-    public bool RemoveMusicPower(int value)
+    private void MasteryLevelUp()
     {
-        if (_musicPower < value)
-        {
-            return false;
-        }
-        else
-        {
-            _musicPower -= value;
-            Managers.Instance.UI.GetRootUI().GetCanvas<MusicPowerCanvas>().SetMusicPower(_musicPower);
-
-            return true;
-        }
+        Managers.Instance.UI.GetRootUI().GetCanvas<CardCanvas>().OpenPanel();
     }
 
-    public void SetMaxMusicPower(int value)
+    private void SyncUI()
     {
-        _maxMusicPower = value;
-
         Managers.Instance.UI.GetRootUI().GetCanvas<MusicPowerCanvas>().SetMaxMusicPower(_maxMusicPower);
+        Managers.Instance.UI.GetRootUI().GetCanvas<MusicPowerCanvas>().SetMusicPower(_musicPower);
     }
 }

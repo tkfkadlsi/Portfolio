@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 
+[RequireComponent(typeof(PoolableObject))]
 public class EnemySpawner : MonoBehaviour
 {
     #region Static
-
-    private static int _enemySpawnCount = 0;
-    private static int _spawnLevel => (int)(_enemySpawnCount * 0.001f);
 
     private static Dictionary<EnemyType, float> _enemySpawnRates = new Dictionary<EnemyType, float>()
     {
@@ -33,6 +32,15 @@ public class EnemySpawner : MonoBehaviour
     private readonly int _spawnCooltime = 4;
     private int _spawnCooldown;
 
+    private int _enemyLevel;
+
+    private PoolableObject _poolable;
+
+    private void Awake()
+    {
+        _poolable = GetComponent<PoolableObject>(); 
+    }
+
     private void OnEnable()
     {
         Managers.Instance.Game.BeatEvent += BeatCounter;
@@ -41,6 +49,8 @@ public class EnemySpawner : MonoBehaviour
         _cashedEffectRatesKey = _enemyEffectRates.Keys.ToList();
 
         _spawnCooldown = _spawnCooltime;
+
+        _enemyLevel = Managers.Instance.Game.GetComponentInScene<EnemySpawnerManagement>().EnemyLevel;
     }
 
     private void OnDisable()
@@ -49,6 +59,12 @@ public class EnemySpawner : MonoBehaviour
         {
             Managers.Instance.Game.BeatEvent -= BeatCounter;
         }
+    }
+
+    private void Update()
+    {
+        float secondsPerRotate = 90f / Managers.Instance.Game.UnitTime;
+        transform.Rotate(new Vector3(0, 1f, 0), secondsPerRotate * Time.deltaTime);
     }
 
     private void BeatCounter()
@@ -69,9 +85,21 @@ public class EnemySpawner : MonoBehaviour
         EffectType effectType = GetRandomEffectType();
         //EqualizeEnemyEffectRates();
 
-        Enemy enemy = Managers.Instance.Pool.PopObject(Managers.Instance.Data.ConvertData.EnemyType2PoolType[type], transform.position).GetComponent<Enemy>();
+        NavMeshHit hit;
+        Vector3 spawnPos = Vector3.zero;
+
+        if (NavMesh.SamplePosition(transform.position, out hit, 1.0f, NavMesh.AllAreas))
+        {
+            spawnPos = hit.position;
+        }
+        
+        Enemy enemy 
+            = Managers.Instance.Pool.PopObject(
+            Managers.Instance.Data.ConvertData.EnemyType2PoolType[type],
+            spawnPos).GetComponent<Enemy>();
+
         enemy.SetEffectType(effectType);
-        enemy.SetHP(Managers.Instance.Data.EnemyDatas[type].EnemyHPDictionary[_spawnLevel]);
+        enemy.SetHP(Managers.Instance.Data.EnemyDatas[type].EnemyHPDictionary[_enemyLevel]);
     }
 
     private EnemyType GetRandomEnemyType()
@@ -160,5 +188,15 @@ public class EnemySpawner : MonoBehaviour
         {
             _enemyEffectRates[type] = Mathf.Lerp(_enemyEffectRates[type], avg, _equalizeSpeed);
         }
+    }
+
+    public void SetEnemyLevel(int level)
+    {
+        _enemyLevel = level;
+    }
+
+    public void PushThisObject()
+    {
+        _poolable.PushThisObject();
     }
 }

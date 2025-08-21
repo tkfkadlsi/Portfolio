@@ -30,8 +30,8 @@ public class MusicDataStorage : MonoBehaviour
     {
         if (MusicDictionary.ContainsKey(music.Type)) return;
 
+        music.PlayCoolDown = 0f;
         MusicDictionary.Add(music.Type, music);
-
         
         BeatDictionary.Add(music.Type, new List<float>());
         MakeBpmInfo(music);

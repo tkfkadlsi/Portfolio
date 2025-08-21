@@ -54,7 +54,7 @@ public class SongInfoPanel : BaseUI
 
     public void SetMusic(Music music)
     {
-        _typeText.text = music.Type.ToString();
+        _typeText.text = music.Name;
         _bpmText.text = _bpm + BpmCheck(music);
         _artistText.text = _krArtist + music.Artist;
 

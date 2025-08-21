@@ -1,10 +1,8 @@
-using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using System;
-using System.Collections;
-using System.Net.NetworkInformation;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using TMPro;
-using DG.Tweening;
 
 [RequireComponent(typeof(MusicDataStorage))]
 [RequireComponent(typeof(AudioSource))]
@@ -13,43 +11,82 @@ public class MusicPlayer : MonoBehaviour
     private AudioSource _musicPlayer;
     private MusicDataStorage _musicdata;
     public float MusicPlayTime => _musicPlayer.time;
-    private readonly float _musicPlayCooltime = 30f;
+    private readonly float _musicPlayCooltime = 60f;
 
     private bool _isPlaying;
+    private bool _isStart;
 
     private void Awake()
     {
         _musicdata = GetComponent<MusicDataStorage>();
         _musicPlayer = GetComponent<AudioSource>();
         _isPlaying = false;
+        _isStart = false;
     }
 
-    private IEnumerator Start()
+    private void Start()
     {
-        yield return Managers.Instance.Game.GetWaitForSeconds(2f);
-        StartMusic(MusicType.Victory);
+        List<Music> musics = _musicdata.MusicDictionary.Values.ToList();
+        for (int i = 0; i < 2; i++)
+        {
+            Music randomMusic = musics[UnityEngine.Random.Range(0, musics.Count)];
+            CardType card = Managers.Instance.Data.ConvertData.MusicType2MusicCardType[randomMusic.Type];
+            Managers.Instance.Game.AddCard(card);
+        }
+        GameStart().Forget();
+    }
+
+    private async UniTaskVoid GameStart()
+    {
+        await UniTask.Delay(3000);
+
+        Managers.Instance.Game.GetComponentInScene<TextCanvas>().GameStart();
+
+        PlayMusic(GetRandomMusic());
     }
 
     #region MusicGetAndSet
 
     private MusicType _playingMusicType;
-    public Music PlayingMusic { get { return _musicdata.MusicDictionary[_playingMusicType]; } }
+    public Music PlayingMusic 
+    {
+        get
+        {
+            if (_musicdata.MusicDictionary.ContainsKey(_playingMusicType) == false)
+                return null;
+
+            return _musicdata.MusicDictionary[_playingMusicType]; 
+        }
+    }
 
     private float _unitTime;
     public float UnitTime { get { return _unitTime; } }
 
-    public void StartMusic(MusicType type)
+    public MusicType GetRandomMusic()
     {
-        PlayMusic(type);
+        List<Music> list = new List<Music>();
+
+        GetPlayableMusicList(list);
+
+        if(list.Count == 0)
+        {
+            _musicPlayer.time = 0f;
+            ResetMusicCooldown();
+            GetPlayableMusicList(list);
+        }
+
+        int rand = UnityEngine.Random.Range(0, list.Count);
+
+        return list[rand].Type;
     }
 
     public void GetPlayableMusicList(List<Music> _musicList)
     {
         _musicList.Clear();
 
-        foreach(Music music in _musicdata.MusicDictionary.Values)
+        foreach (Music music in _musicdata.MusicDictionary.Values)
         {
-            if(music.PlayCoolDown <= 0f)
+            if (PlayingMusic != music && music.Clip.length > _musicPlayer.time && music.PlayCoolDown <= 0f && Managers.Instance.Game.GetCardCount(Managers.Instance.Data.ConvertData.MusicType2MusicCardType[music.Type]) != 0)
             {
                 _musicList.Add(music);
             }
@@ -58,7 +95,7 @@ public class MusicPlayer : MonoBehaviour
 
     public async Awaitable ChangeMusic(MusicType type)
     {
-        Debug.Log("변경시작");
+        Debug.Log($"변경시작 : {type}");
 
         float time = MusicPlayTime;
 
@@ -72,6 +109,11 @@ public class MusicPlayer : MonoBehaviour
         int vocalPlayCount = 0;
 
         Music music = _musicdata.MusicDictionary[type];
+
+        if(music.Clip.length < time)
+        {
+            time = 0f;
+        }
 
         await Awaitable.BackgroundThreadAsync();
 
@@ -87,32 +129,32 @@ public class MusicPlayer : MonoBehaviour
 
         CheckInstrumentsCount(type, time, _musicdata.CoreDictionary, ref corePlayCount);
 
-        if(music.IsPianoUsable == true)
+        if (music.IsPianoUsable == true)
         {
             CheckInstrumentsCount(type, time, _musicdata.PianoDictionary, ref pianoPlayCount);
         }
 
-        if(music.IsDrumUsable == true)
+        if (music.IsDrumUsable == true)
         {
             CheckInstrumentsCount(type, time, _musicdata.DrumDictionary, ref drumPlayCount);
         }
 
-        if(music.IsGuitarUsable == true)
+        if (music.IsGuitarUsable == true)
         {
             CheckInstrumentsCount(type, time, _musicdata.GuitarDictionary, ref guitarPlayCount);
         }
 
-        if(music.IsViolinUsable == true)
+        if (music.IsViolinUsable == true)
         {
             CheckInstrumentsCount(type, time, _musicdata.ViolinDictionary, ref violinPlayCount);
         }
 
-        if(music.IsTrumpetUsable == true)
+        if (music.IsTrumpetUsable == true)
         {
             CheckInstrumentsCount(type, time, _musicdata.TrumpetDictionary, ref trumpetPlayCount);
         }
 
-        if(music.IsVocalUsable == true)
+        if (music.IsVocalUsable == true)
         {
             while (_musicdata.VocalDictionary[type][vocalPlayCount].StartTime <= time)
             {
@@ -136,12 +178,7 @@ public class MusicPlayer : MonoBehaviour
         _trumpetPlayCount = trumpetPlayCount;
         _vocalPlayCount = vocalPlayCount;
 
-        PlayingMusic.PlayCoolDown = _musicPlayCooltime;
-
-        _playingMusicType = type;
-        _musicPlayer.clip = _musicdata.MusicDictionary[type].Clip;
-        _musicPlayer.time = time;
-        _musicPlayer.Play();
+        PlayMusic(type, time);
     }
 
     private void CheckInstrumentsCount(MusicType type, float time, Dictionary<MusicType, List<InstrumentsNote>> dict, ref int playCount)
@@ -157,13 +194,44 @@ public class MusicPlayer : MonoBehaviour
         }
     }
 
-    private void PlayMusic(MusicType type)
+    private void PlayMusic(MusicType type, float time = 0f)
     {
+        if (PlayingMusic != null)
+        {
+            PlayingMusic.PlayCoolDown = _musicPlayCooltime;
+        }
+
+        if(time == 0f)
+        {
+            _bpmPlayCount = 0;
+            _corePlayCount = 0;
+            _beatPlayCount = 0;
+            _pianoPlayCount = 0;
+            _drumPlayCount = 0;
+            _guitarPlayCount = 0;
+            _violinPlayCount = 0;
+            _trumpetPlayCount = 0;
+            _vocalPlayCount = 0;
+        }
+
+        _musicPlayer.Stop();
+
         _playingMusicType = type;
         _musicPlayer.clip = _musicdata.MusicDictionary[type].Clip;
-        _musicPlayer.time = 0f;
+        _musicPlayer.time = time;
         _musicPlayer.Play();
         _isPlaying = true;
+
+        Managers.Instance.Game.MusicPlayEvent?.Invoke();
+        _isStart = true;
+    }
+
+    public void ResetMusicCooldown()
+    {
+        foreach(Music music in _musicdata.MusicDictionary.Values)
+        {
+            music.PlayCoolDown = 0f;
+        }
     }
 
     #endregion
@@ -183,9 +251,9 @@ public class MusicPlayer : MonoBehaviour
 
     private void Update()
     {
-        if(_isPlaying)
+        CoolDown();
+        if (_isPlaying)
         {
-            CoolDown();
 
             BpmCheck();
 
@@ -198,11 +266,18 @@ public class MusicPlayer : MonoBehaviour
             if (PlayingMusic.IsTrumpetUsable) PlayTrumpet();
             if (PlayingMusic.IsVocalUsable) PlayVocal();
         }
+
+        if (_isStart == true && _musicPlayer.isPlaying == false)
+        {
+            Debug.Log("곡 끝남");
+            ResetMusicCooldown();
+            PlayMusic(GetRandomMusic());
+        }
     }
 
     private void CoolDown()
     {
-        foreach(Music music in _musicdata.MusicDictionary.Values)
+        foreach (Music music in _musicdata.MusicDictionary.Values)
         {
             music.PlayCoolDown -= Time.deltaTime;
         }
@@ -275,7 +350,7 @@ public class MusicPlayer : MonoBehaviour
             Managers.Instance.Game.DrumPlayEvent?.Invoke(isHigh);
         });
     }
-         
+
     private void PlayGuitar()
     {
         PlayInstrument(_playingMusicType, _musicdata.GuitarDictionary, ref _guitarPlayCount, (bool isHigh) =>
@@ -328,13 +403,23 @@ public class MusicPlayer : MonoBehaviour
         while (dict[type][playCount].Timing <= MusicPlayTime)
         {
             playCount++;
-            action?.Invoke(dict[type][playCount].IsHighNote);
 
             if (dict[type].Count <= playCount)
             {
                 break;
             }
+
+            action?.Invoke(dict[type][playCount].IsHighNote);
         }
+    }
+
+    #endregion
+
+    #region Setting
+
+    public void SetMute(bool value)
+    {
+        _musicPlayer.mute = value;
     }
 
     #endregion

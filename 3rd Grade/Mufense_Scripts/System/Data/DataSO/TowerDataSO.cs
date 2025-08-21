@@ -6,6 +6,8 @@ public class TowerDataSO : ScriptableObject
 {
     public string DisplayName = "";
 
+    public string Description = "";
+
     [SerializedDictionary("Level", "Damage")]
     public SerializedDictionary<int, float> Damage = new SerializedDictionary<int, float>();
     

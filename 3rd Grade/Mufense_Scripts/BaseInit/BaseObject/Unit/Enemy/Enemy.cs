@@ -1,9 +1,8 @@
-using DG.Tweening;
-using System.Collections;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using System;
 using UnityEngine;
 using UnityEngine.AI;
-using System;
 
 [RequireComponent(typeof(EnemyEffect))]
 public abstract class Enemy : Unit
@@ -33,14 +32,6 @@ public abstract class Enemy : Unit
 
         Core core = Managers.Instance.Game.GetComponentInScene<Core>();
         _targetPos = core.transform.position;
-
-        NavMeshAgent agent = GetT<NavMeshAgent>();
-        agent.agentTypeID = 0;
-        agent.acceleration = 1000f;
-        agent.speed = 7.5f;
-        agent.angularSpeed = 360f;
-        agent.stoppingDistance = 0f;
-        agent.autoBraking = false;
     }
 
     protected override void Enable()
@@ -49,8 +40,16 @@ public abstract class Enemy : Unit
 
         NavMeshAgent agent = GetT<NavMeshAgent>();
 
-        _isLastJump = false;
+        agent.agentTypeID = 0;
+        agent.acceleration = 1000f;
+        agent.speed = 4f;
+        agent.angularSpeed = 360f;
+        agent.stoppingDistance = 0f;
+        agent.autoBraking = false;
         agent.isStopped = true;
+
+        _isLastJump = false;
+
         Managers.Instance.Game.BeatEvent += BeatCounter;
     }
 
@@ -61,6 +60,8 @@ public abstract class Enemy : Unit
             Managers.Instance.Game.BeatEvent -= BeatCounter;
         }
 
+        DOTween.Kill(gameObject);
+        DOTween.Kill(_visual.gameObject);
         base.Disable();
     }
 
@@ -68,9 +69,9 @@ public abstract class Enemy : Unit
 
     protected void SetEnemyType(EnemyType type, bool isRest = false)
     {
-            Type = type;
+        Type = type;
 
-        if(isRest)
+        if (isRest)
         {
             _beatsPerMove = (int)Type - 10;
             _beatCount = (int)Type - 10;
@@ -80,7 +81,6 @@ public abstract class Enemy : Unit
             _beatsPerMove = (int)Type;
             _beatCount = (int)Type;
         }
-
     }
 
     public void SetEffectType(EffectType type)
@@ -117,7 +117,7 @@ public abstract class Enemy : Unit
 
         if (_beatCount > _beatsPerMove)
         {
-            if(_isLastJump)
+            if (_isLastJump)
             {
                 _beatCount -= _beatsPerMove;
                 LastJump().Forget();
@@ -131,6 +131,8 @@ public abstract class Enemy : Unit
 
     private async UniTask Jump()
     {
+        if (IsStun == true) return;
+
         NavMeshAgent agent = GetT<NavMeshAgent>();
         float jumpTime = Managers.Instance.Game.UnitTime * _beatsPerMove * 0.5f;
 
@@ -145,13 +147,6 @@ public abstract class Enemy : Unit
 
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
-
-        float distance = Vector3.Distance(agent.destination, transform.position);
-
-        if(distance <= _arriveDistance)
-        {
-            _isLastJump = true;
-        }
     }
 
     private async UniTask LastJump()
@@ -162,26 +157,48 @@ public abstract class Enemy : Unit
         NavMeshAgent agent = GetT<NavMeshAgent>();
         agent.isStopped = false;
 
-        transform.DOLocalJump(core.transform.position, 2, 1, jumpTime);
+        Vector3 jumpPos = transform.position + (core.transform.position - transform.position).normalized * 3f;
+
+        transform.DOLocalJump(jumpPos, 2, 1, jumpTime);
 
         await UniTask.Delay(TimeSpan.FromSeconds(jumpTime * 0.9f));
 
         if (gameObject.activeInHierarchy == false) return;
 
-        core.Hit();
+        core.Hit(HP);
         Die();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Core"))
+        {
+            _isLastJump = true;
+        }
     }
 
     #endregion
 
     #region Hit
 
+    public override void Stun(float time)
+    {
+        base.Stun(time);
+
+        NavMeshAgent agent = GetT<NavMeshAgent>();
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+
+        DOTween.Kill(_visual.gameObject);
+        DOTween.Kill(gameObject);
+    }
+
     public override void Die(InstrumentsTower attacker = null)
     {
         DOTween.Kill(gameObject);
         DOTween.Kill(_visual.gameObject);
 
-        if(attacker != null)
+        if (attacker != null)
         {
             Managers.Instance.Game.GetComponentInScene<MusicPowerData>().AddMusicPower(
                 Managers.Instance.Data.EnemyDatas[Type].RewardMusicPower);

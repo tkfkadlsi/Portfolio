@@ -88,6 +88,7 @@ public class TowerBuilder : MonoBehaviour
     {
         _isBuilding = false;
         _renderer.enabled = false;
+        Managers.Instance.Data.TowerCountManagement.BuildTower(_buildTowerType);
         Managers.Instance.UI.GetRootUI().GetCanvas<MenuCanvas>().SetEnable(true);
     }
 

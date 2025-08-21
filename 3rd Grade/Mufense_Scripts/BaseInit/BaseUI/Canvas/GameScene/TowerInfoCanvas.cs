@@ -66,10 +66,15 @@ public class TowerInfoCanvas : BaseCanvas, IOpenClosePanel
         });
     }
 
-    public void SetTower(InstrumentsTower tower)
+    public void SetTower(Tower tower)
     {
         OpenPanel();
         _infoPanel.SetTower(tower);
+    }
+
+    public void SyncUI(Tower caller)
+    {
+        _infoPanel.SyncUI(caller);
     }
 
     private void ButtonHandler()

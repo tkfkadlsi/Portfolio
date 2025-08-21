@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,6 +29,6 @@ public class MusicPowerCanvas : BaseCanvas
 
     public void SetMusicPower(int musicPower)
     {
-        _musicPowerSlider.value = musicPower;
+        _musicPowerSlider.DOValue(musicPower, Managers.Instance.Game.UnitTime);
     }
 }

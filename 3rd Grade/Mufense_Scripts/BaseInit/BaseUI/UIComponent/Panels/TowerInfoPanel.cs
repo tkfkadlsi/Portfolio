@@ -10,7 +10,7 @@ public class TowerInfoPanel : BaseUI
         LevelText,
         DamageText,
         RangeText,
-        MPUseText,
+        InfoText,
         AlreadyUpgradeText
     }
 
@@ -24,19 +24,19 @@ public class TowerInfoPanel : BaseUI
     private TextMeshProUGUI _levelText;
     private TextMeshProUGUI _damageText;
     private TextMeshProUGUI _rangeText;
-    private TextMeshProUGUI _mpUseText;
+    private TextMeshProUGUI _infoText;
     private TextMeshProUGUI _alreadyUpgradeText;
 
     private Button _upgradeButton;
     private Button _breakButton;
 
-    private InstrumentsTower _focusingTower;
+    private Tower _focusingTower;
 
     private readonly string _level = "★";
 
-    private readonly string _krDamage = "데미지";
-    private readonly string _krRange = "사정거리";
-    private readonly string _krMPUse = "MP소모량";
+    private readonly string _damage = "공격력 : ";
+    private readonly string _range = "사거리 : ";
+
     private readonly string _krAlreadyUpgrade = "업그레이드 진행중..";
     private readonly string _krMaxUpgrade = "최고 레벨입니다.";
 
@@ -51,7 +51,7 @@ public class TowerInfoPanel : BaseUI
         _levelText = Get<TextMeshProUGUI>((int)ETexts.LevelText);
         _damageText = Get<TextMeshProUGUI>((int)ETexts.DamageText);
         _rangeText = Get<TextMeshProUGUI>((int)ETexts.RangeText);
-        _mpUseText = Get<TextMeshProUGUI>((int)ETexts.MPUseText);
+        _infoText = Get<TextMeshProUGUI>((int)ETexts.InfoText);
         _alreadyUpgradeText = Get<TextMeshProUGUI>((int)ETexts.AlreadyUpgradeText);
 
         _upgradeButton = Get<Button>((int)EButtons.UpgradeButton);
@@ -69,40 +69,45 @@ public class TowerInfoPanel : BaseUI
         _breakButton.onClick.RemoveAllListeners();
     }
 
-    public void SetTower(InstrumentsTower tower)
+    public void SetTower(Tower tower)
     {
         _focusingTower = tower;
 
         _typeText.text = Managers.Instance.Data.ConvertData.TowerType2KRText[_focusingTower.Type];
 
+        SyncUI(_focusingTower);
+    }
+
+    public void SyncUI(Tower caller)
+    {
+        if (caller != _focusingTower) return;
+
         _levelText.text = "";
-        for(int i = 0; i < _focusingTower.Level; i++)
+        for (int i = 0; i < _focusingTower.Level; i++)
         {
             _levelText.text += _level;
         }
 
-        _damageText.text = $"{_krDamage} : {Managers.Instance.Data.TowerDatas[_focusingTower.Type].Damage[_focusingTower.Level]}";
+        _damageText.text = _damage + Managers.Instance.Data.TowerStatManagement.GetDamage(caller.Type);
+        _rangeText.text = _range + Managers.Instance.Data.TowerStatManagement.GetRange(caller.Type, caller.Level);
 
-        _rangeText.text = $"{_krRange} : {Managers.Instance.Data.TowerDatas[_focusingTower.Type].Range[_focusingTower.Level]}";
-
-        _mpUseText.text = $"{_krMPUse} : {Managers.Instance.Data.TowerDatas[_focusingTower.Type].UsingMusicPower[_focusingTower.Level]}";
-
-        _alreadyUpgradeText.text = _krAlreadyUpgrade;
-
-        if(_focusingTower.IsUpgrading == true)
+        if (_focusingTower.IsUpgrading == true) 
         {
+            _infoText.text = Managers.Instance.Data.TowerStatManagement.GetDescription(_focusingTower.Type);
             _upgradeButton.gameObject.SetActive(false);
             _alreadyUpgradeText.gameObject.SetActive(true);
             _alreadyUpgradeText.text = _krAlreadyUpgrade;
         }
         else if (_focusingTower.Level == 3)
         {
+            _infoText.text = "";
             _upgradeButton.gameObject.SetActive(false);
             _alreadyUpgradeText.gameObject.SetActive(true);
             _alreadyUpgradeText.text = _krMaxUpgrade;
         }
         else
         {
+            _infoText.text = Managers.Instance.Data.TowerStatManagement.GetDescription(_focusingTower.Type);
             _upgradeButton.gameObject.SetActive(true);
             _alreadyUpgradeText.gameObject.SetActive(false);
         }
@@ -112,7 +117,7 @@ public class TowerInfoPanel : BaseUI
     {
         if (_focusingTower.gameObject.activeInHierarchy == true)
         {
-            _focusingTower.LevelUp();
+            _focusingTower.LevelUpStart();
             Managers.Instance.UI.GetRootUI().GetCanvas<TowerInfoCanvas>().ClosePanel();
         }
     }

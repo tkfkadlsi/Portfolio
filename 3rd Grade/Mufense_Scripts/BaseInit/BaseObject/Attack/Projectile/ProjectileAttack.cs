@@ -7,6 +7,7 @@ public abstract class ProjectileAttack : Attack
     [SerializeField] protected float _speed;
     protected Vector3 _direction;
     private float _lifeTime;
+    private float _t;
 
 
     public override void SettingAttack(float damage, float range, Vector3 dir, InstrumentsTower attacker = null)
@@ -23,8 +24,8 @@ public abstract class ProjectileAttack : Attack
 
     private async UniTask LifeUniTask()
     {
-        float t = 0f;
-        while(t < _lifeTime)
+        _t = 0f;
+        while(_t < _lifeTime)
         {
             ProjectileMove();
 
@@ -32,10 +33,15 @@ public abstract class ProjectileAttack : Attack
 
             if (gameObject.activeInHierarchy == false) return;
 
-            t += Time.deltaTime;
+            _t += Time.deltaTime;
         }
 
         PushThisObject();
+    }
+
+    protected float GetRemainderLifetime()
+    {
+        return _lifeTime - _t;
     }
 
     protected abstract void ProjectileMove();

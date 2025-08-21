@@ -3,12 +3,17 @@ using System.Collections.Generic;
 
 public class VocalTower : Tower
 {
-    public readonly TowerType Type = TowerType.Vocal;
-
     [SerializeField] private LayerMask _instrumentsTowerLayer;
 
     private List<InstrumentsTower> _instruments = new List<InstrumentsTower>();
     private Collider[] _buffer = new Collider[20];
+
+    protected override void Init()
+    {
+        base.Init();
+
+        SetTowerType(TowerType.Vocal);
+    }
 
     protected override void Enable()
     {
@@ -33,7 +38,7 @@ public class VocalTower : Tower
     {
         foreach(var inst in _instruments)
         {
-            inst.AddDamageMultiplier(Managers.Instance.Data.TowerDatas[Type].Damage[Level], time);
+            inst.AddDamageMultiplier(Managers.Instance.Data.TowerStatManagement.GetDamage(Type), time);
         }
     }
 
@@ -41,7 +46,7 @@ public class VocalTower : Tower
     {
         _instruments.Clear();
 
-        int count = Physics.OverlapSphereNonAlloc(transform.position, Managers.Instance.Data.TowerDatas[Type].Range[Level], _buffer, _instrumentsTowerLayer);
+        int count = Physics.OverlapSphereNonAlloc(transform.position, Managers.Instance.Data.TowerStatManagement.GetRange(Type), _buffer, _instrumentsTowerLayer);
 
         for(int i = 0; i < count; i++)
         {

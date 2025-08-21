@@ -33,5 +33,9 @@ public enum PoolType
 
     HalfEnemy = 300,
     QuarterEnemy = 301,
-    QuarterRestEnemy = 302
+    QuarterRestEnemy = 302,
+    
+    EnemySpawner = 400,
+    EnemyWayLine = 401,
+    EnemyWayArrow = 402
 }
