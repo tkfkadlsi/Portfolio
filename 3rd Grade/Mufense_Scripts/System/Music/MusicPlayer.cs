@@ -95,7 +95,7 @@ public class MusicPlayer : MonoBehaviour
 
     public async Awaitable ChangeMusic(MusicType type)
     {
-        Debug.Log($"∫Ø∞ÊΩ√¿€ : {type}");
+        Debug.Log($"ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ : {type}");
 
         float time = MusicPlayTime;
 
@@ -269,7 +269,7 @@ public class MusicPlayer : MonoBehaviour
 
         if (_isStart == true && _musicPlayer.isPlaying == false)
         {
-            Debug.Log("∞Ó ≥°≥≤");
+            Debug.Log("ÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩ");
             ResetMusicCooldown();
             PlayMusic(GetRandomMusic());
         }
@@ -383,7 +383,7 @@ public class MusicPlayer : MonoBehaviour
         {
             Managers.Instance.Game.VocalPlayEvent?.Invoke(
                 _musicdata.VocalDictionary[_playingMusicType][_vocalPlayCount].EndTime
-                - //∏∂¿Ã≥ Ω∫
+                - //ÎßàÏù¥ÎÑàÏä§
                 _musicdata.VocalDictionary[_playingMusicType][_vocalPlayCount].StartTime
                 );
 
