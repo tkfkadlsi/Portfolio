@@ -3,15 +3,16 @@ using UnityEngine;
 
 public class Pool
 {
-    private Transform _poolParent;
+    public Transform PoolParent;
     private Queue<PoolableObject> _pool = new Queue<PoolableObject>();
 
     public int PoolCount => _pool.Count;
 
     public void Init(PoolType pooltype)
     {
-        _poolParent = new GameObject().transform;
-        _poolParent.name = pooltype.ToString();
+        PoolParent = new GameObject().transform;
+        PoolParent.SetParent(Managers.Instance.Pool.transform);
+        PoolParent.name = pooltype.ToString();
     }
 
     public PoolableObject PopObject(Vector3 position)
@@ -36,8 +37,16 @@ public class Pool
     public void PushObject(PoolableObject po)
     {
         po.gameObject.SetActive(false);
-        po.transform.SetParent(_poolParent);
+        po.transform.SetParent(PoolParent);
         po.transform.position = new Vector3(0, -10000, 0);
         _pool.Enqueue(po);
+    }
+
+    public void ResetPool(PoolManager pm)
+    {
+        while(_pool.Count > 0)
+        {
+            pm.DestroyObject(_pool.Dequeue());
+        }
     }
 }

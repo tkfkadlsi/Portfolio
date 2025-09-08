@@ -6,5 +6,7 @@ public enum MusicType
     Victory = 1,
     SecretLibrary = 2,
     In59Sec = 3,
-    CookieRequest = 4
+    CookieRequest = 4,
+    InTheSea = 5,
+    Zeroone = 6
 }

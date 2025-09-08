@@ -100,6 +100,7 @@ public class EnemySpawner : MonoBehaviour
 
         enemy.SetEffectType(effectType);
         enemy.SetHP(Managers.Instance.Data.EnemyDatas[type].EnemyHPDictionary[_enemyLevel]);
+        enemy.AddTarget();
     }
 
     private EnemyType GetRandomEnemyType()

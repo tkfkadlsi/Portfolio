@@ -54,12 +54,12 @@ public class TowerInfoCanvas : BaseCanvas, IOpenClosePanel
     {
         SetEnable(true);
         _panel.rectTransform.localScale = Vector3.zero;
-        _panel.rectTransform.DOScale(1f, Managers.Instance.Game.UnitTime);
+        _panel.rectTransform.DOScale(1f, 0.25f);
     }
 
     public void ClosePanel()
     {
-        _panel.rectTransform.DOScale(0f, Managers.Instance.Game.UnitTime).OnComplete(() =>
+        _panel.rectTransform.DOScale(0f, 0.25f).OnComplete(() =>
         {
             SetEnable(false);
             Managers.Instance.UI.GetRootUI().GetCanvas<MenuCanvas>().SetEnable(true);

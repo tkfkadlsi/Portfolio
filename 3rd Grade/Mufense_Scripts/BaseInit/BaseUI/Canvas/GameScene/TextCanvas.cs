@@ -1,3 +1,4 @@
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
@@ -6,11 +7,13 @@ public class TextCanvas : BaseCanvas
     enum ETexts
     {
         GameStartText,
-        GameTimerText
+        GameTimerText,
+        WarningText
     }
 
     private TextMeshProUGUI _gameStartText;
     private TextMeshProUGUI _gameTimerText;
+    private TextMeshProUGUI _warningText;
 
     protected override void Init()
     {
@@ -20,11 +23,20 @@ public class TextCanvas : BaseCanvas
 
         _gameStartText = Get<TextMeshProUGUI>((int)ETexts.GameStartText);
         _gameTimerText = Get<TextMeshProUGUI>((int)ETexts.GameTimerText);
+        _warningText = Get<TextMeshProUGUI>((int)ETexts.WarningText);
     }
 
     public void GameStart()
     {
         _gameStartText.gameObject.SetActive(false);
+    }
+
+    public void SetWarning(string text)
+    {
+        DOTween.Kill(_warningText);
+        _warningText.color = Color.white;
+        _warningText.text = text;
+        _warningText.DOColor(Color.clear, 1f).SetEase(Ease.InCirc);
     }
 
     #region Timer
@@ -57,9 +69,12 @@ public class TextCanvas : BaseCanvas
             }
         }
 
-        float time = Mathf.Round(times[shortestTimeIndex] * 10) * 0.1f;
+        int time = (int)(Mathf.Round(shortestTime * 10f));
 
-        string text = $"{strings[shortestTimeIndex]} : {time}s";
+        int second = (int)(time * 0.1f);
+        int hundredms = ((int)time) % 10;
+
+        string text = $"{strings[shortestTimeIndex]} : {second}.{hundredms}s";
 
         _gameTimerText.text = text;
     }

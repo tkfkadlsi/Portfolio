@@ -1,3 +1,4 @@
+using TMPro.EditorUtilities;
 using UnityEngine;
 
 public class MusicPowerData : MonoBehaviour
@@ -5,10 +6,24 @@ public class MusicPowerData : MonoBehaviour
     private int _maxMusicPower;
     private int _musicPower;
 
+    private int _coreMusicPower;
+    public int CoreMusicPower
+    {
+        get
+        {
+            return _coreMusicPower;
+        }
+        set
+        {
+            _coreMusicPower = value;
+        }
+    }
+
     private void Start()
     {
         _maxMusicPower = 100;
         _musicPower = 0;
+        _coreMusicPower = 0;
         SyncUI();
     }
 
@@ -35,5 +50,6 @@ public class MusicPowerData : MonoBehaviour
     {
         Managers.Instance.UI.GetRootUI().GetCanvas<MusicPowerCanvas>().SetMaxMusicPower(_maxMusicPower);
         Managers.Instance.UI.GetRootUI().GetCanvas<MusicPowerCanvas>().SetMusicPower(_musicPower);
+        Managers.Instance.UI.GetRootUI().GetCanvas<MenuCanvas>().SyncUI();
     }
 }

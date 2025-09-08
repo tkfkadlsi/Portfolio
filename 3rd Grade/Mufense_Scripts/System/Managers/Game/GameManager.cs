@@ -32,10 +32,18 @@ public class GameManager : MonoBehaviour
         {
             _componentDictionary.Add(type, FindAnyObjectByType<T>());
         }
-        else if(_componentDictionary[type] == null)
+        
+        if(_componentDictionary[type] == null)
         {
             _componentDictionary[type] = FindAnyObjectByType<T>();
+
+            if (_componentDictionary[type] == null)
+            {
+                return null;
+            }
         }
+
+
 
         return _componentDictionary[type] as T;
     }
@@ -77,7 +85,20 @@ public class GameManager : MonoBehaviour
 
     public Music PlayingMusic => GetComponentInScene<MusicPlayer>().PlayingMusic;
 
-    public float UnitTime => GetComponentInScene<MusicPlayer>().UnitTime;
+    public float UnitTime 
+    {
+        get
+        {
+            if(GetComponentInScene<MusicPlayer>() != null)
+            {
+                return GetComponentInScene<MusicPlayer>().UnitTime;
+            }
+            else
+            {
+                return GetComponentInScene<TitleMusicPlayer>().UnitTime;
+            }
+        } 
+    }
 
     #endregion
 
@@ -114,8 +135,16 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
+    #region Game
+
+    public float LiveTime;
+    public int KillCount;
+
+    #endregion
+
     public void AllClear()
     {
+        MasteryLevel = 0;
         _waitForSecondDictionary.Clear();
         _componentDictionary.Clear();
         _selectedCardDictionary.Clear();

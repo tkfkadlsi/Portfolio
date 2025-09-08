@@ -61,7 +61,7 @@ public class TowerBuildCanvas : BaseCanvas, IOpenClosePanel
     {
         SetEnable(true);
         _panel.rectTransform.anchoredPosition = new Vector2(0, -200f);
-        _panel.rectTransform.DOAnchorPosY(0f, Managers.Instance.Game.UnitTime, true);
+        _panel.rectTransform.DOAnchorPosY(0f, 0.25f, true);
 
         foreach (var kv in _towerButtonDictionary)
         {
@@ -72,7 +72,7 @@ public class TowerBuildCanvas : BaseCanvas, IOpenClosePanel
 
     public void ClosePanel()
     {
-        _panel.rectTransform.DOAnchorPosY(-200f, Managers.Instance.Game.UnitTime, true).OnComplete(() =>
+        _panel.rectTransform.DOAnchorPosY(-200f, 0.25f, true).OnComplete(() =>
         {
             SetEnable(false);
         });

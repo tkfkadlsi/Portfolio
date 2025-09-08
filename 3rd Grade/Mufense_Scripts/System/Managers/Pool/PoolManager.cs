@@ -25,6 +25,7 @@ public class PoolManager : MonoBehaviour
 
         po.gameObject.SetActive(false);
         po.transform.position = new Vector3(0, -10000f, 0);
+        po.transform.SetParent(_poolDictionary[type].PoolParent, true);
         return po;
     }
 
@@ -68,5 +69,25 @@ public class PoolManager : MonoBehaviour
     public void PushObject(PoolType type, PoolableObject po)
     {
         _poolDictionary[type].PushObject(po);
+    }
+
+    public void ResetPools()
+    {
+        PoolableObject[] poolables = GetComponentsInChildren<PoolableObject>();
+
+        for(int i = 0; i <  poolables.Length; i++)
+        {
+            poolables[i].PushThisObject();
+        }
+
+        foreach(Pool pool in  _poolDictionary.Values)
+        {
+            pool.ResetPool(this);
+        }
+    }
+
+    public void DestroyObject(PoolableObject po)
+    {
+        Destroy(po.gameObject);
     }
 }

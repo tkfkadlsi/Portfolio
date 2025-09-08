@@ -16,9 +16,12 @@ public enum PoolType
     DrumAttackEffect = 105,
     GuitarAttackEffect = 106,
     ViolinAttackEffect = 107,
+    CoreAttackEffect = 108,
 
     TowerStunEffect = 150,
     TowerLevelUpEffect = 151,
+    CoreHitEffect = 152,
+    BeatEffect = 153,
 
     HighPianoProjectile = 200,
     LowPianoProjectile = 201,
@@ -30,6 +33,7 @@ public enum PoolType
     LowViolinWave = 207,
     HighTrumpetWave = 208,
     LowTrumpetWave = 209,
+    CoreAttack = 210,
 
     HalfEnemy = 300,
     QuarterEnemy = 301,

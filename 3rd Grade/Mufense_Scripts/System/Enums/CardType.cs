@@ -24,5 +24,7 @@ public enum CardType
     VictoryUnLockCard,
     SecretLibraryUnLockCard,
     In59SecUnLockCard,
-    CookieRequestUnLockCard
+    CookieRequestUnLockCard,
+    WaterColorUnLockCard,
+    ZeroOneColorUnLockCard
 }

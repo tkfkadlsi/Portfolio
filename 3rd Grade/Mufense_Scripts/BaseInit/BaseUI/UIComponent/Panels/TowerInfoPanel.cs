@@ -11,7 +11,8 @@ public class TowerInfoPanel : BaseUI
         DamageText,
         RangeText,
         InfoText,
-        AlreadyUpgradeText
+        AlreadyUpgradeText,
+        BreakText
     }
 
     enum EButtons
@@ -26,6 +27,7 @@ public class TowerInfoPanel : BaseUI
     private TextMeshProUGUI _rangeText;
     private TextMeshProUGUI _infoText;
     private TextMeshProUGUI _alreadyUpgradeText;
+    private TextMeshProUGUI _breakText;
 
     private Button _upgradeButton;
     private Button _breakButton;
@@ -39,6 +41,8 @@ public class TowerInfoPanel : BaseUI
 
     private readonly string _krAlreadyUpgrade = "업그레이드 진행중..";
     private readonly string _krMaxUpgrade = "최고 레벨입니다.";
+    private readonly string _break = "철거";
+    private readonly string _cantBreak = "철거 불가능";
 
     protected override void Init()
     {
@@ -53,12 +57,15 @@ public class TowerInfoPanel : BaseUI
         _rangeText = Get<TextMeshProUGUI>((int)ETexts.RangeText);
         _infoText = Get<TextMeshProUGUI>((int)ETexts.InfoText);
         _alreadyUpgradeText = Get<TextMeshProUGUI>((int)ETexts.AlreadyUpgradeText);
+        _breakText = Get<TextMeshProUGUI>((int)ETexts.BreakText);
 
         _upgradeButton = Get<Button>((int)EButtons.UpgradeButton);
         _breakButton = Get<Button>((int)EButtons.BreakButton);
 
         _upgradeButton.onClick.AddListener(UpgradeButtonHandler);
         _breakButton.onClick.AddListener(BreakButtonHandler);
+
+        _breakText.text = _cantBreak;
     }
 
     protected override void Release()
@@ -96,20 +103,26 @@ public class TowerInfoPanel : BaseUI
             _infoText.text = Managers.Instance.Data.TowerStatManagement.GetDescription(_focusingTower.Type);
             _upgradeButton.gameObject.SetActive(false);
             _alreadyUpgradeText.gameObject.SetActive(true);
+            _breakButton.interactable = false;
             _alreadyUpgradeText.text = _krAlreadyUpgrade;
+            _breakText.text = _cantBreak;
         }
         else if (_focusingTower.Level == 3)
         {
             _infoText.text = "";
             _upgradeButton.gameObject.SetActive(false);
             _alreadyUpgradeText.gameObject.SetActive(true);
+            _breakButton.interactable = true;
             _alreadyUpgradeText.text = _krMaxUpgrade;
+            _breakText.text = _break;
         }
         else
         {
             _infoText.text = Managers.Instance.Data.TowerStatManagement.GetDescription(_focusingTower.Type);
             _upgradeButton.gameObject.SetActive(true);
             _alreadyUpgradeText.gameObject.SetActive(false);
+            _breakButton.interactable = true;
+            _breakText.text = _break;
         }
     }
 

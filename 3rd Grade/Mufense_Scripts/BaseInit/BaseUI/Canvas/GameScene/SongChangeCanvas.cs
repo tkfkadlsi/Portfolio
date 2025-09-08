@@ -1,8 +1,7 @@
-using UnityEngine;
-using System.Collections.Generic;
-using UnityEngine.UI;
 using DG.Tweening;
-using TMPro.EditorUtilities;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class SongChangeCanvas : BaseCanvas, IOpenClosePanel
 {
@@ -19,7 +18,9 @@ public class SongChangeCanvas : BaseCanvas, IOpenClosePanel
         VictoryButton,
         SecretLibraryButton,
         In59SecButton,
-        CookieRequestButton
+        CookieRequestButton,
+        WaterColorButton,
+        ZeroOneButton
     }
 
     enum EButtons
@@ -46,6 +47,8 @@ public class SongChangeCanvas : BaseCanvas, IOpenClosePanel
         _changeButtonDictionary.Add(MusicType.SecretLibrary, Get<SongChangeButton>((int)ESongChangeButtons.SecretLibraryButton));
         _changeButtonDictionary.Add(MusicType.In59Sec, Get<SongChangeButton>((int)ESongChangeButtons.In59SecButton));
         _changeButtonDictionary.Add(MusicType.CookieRequest, Get<SongChangeButton>((int)ESongChangeButtons.CookieRequestButton));
+        _changeButtonDictionary.Add(MusicType.InTheSea, Get<SongChangeButton>((int)ESongChangeButtons.WaterColorButton));
+        _changeButtonDictionary.Add(MusicType.Zeroone, Get<SongChangeButton>((int)ESongChangeButtons.ZeroOneButton));
 
         _button = Get<Button>((int)EButtons.BackGround);
 
@@ -63,18 +66,18 @@ public class SongChangeCanvas : BaseCanvas, IOpenClosePanel
 
     private void Update()
     {
-        if(GetEnable() == true)
+        if (GetEnable() == true)
         {
             Managers.Instance.Game.GetComponentInScene<MusicPlayer>().GetPlayableMusicList(_playableMusicList);
 
-            foreach(SongChangeButton button in _changeButtonDictionary.Values)
+            foreach (SongChangeButton button in _changeButtonDictionary.Values)
             {
                 button.gameObject.SetActive(false);
             }
 
-            foreach(Music music in _playableMusicList)
+            foreach (Music music in _playableMusicList)
             {
-                if(music != Managers.Instance.Game.PlayingMusic && music.Clip.length >= Managers.Instance.Game.GetComponentInScene<MusicPlayer>().MusicPlayTime)
+                if (music != Managers.Instance.Game.PlayingMusic && music.Clip.length >= Managers.Instance.Game.GetComponentInScene<MusicPlayer>().MusicPlayTime)
                 {
                     _changeButtonDictionary[music.Type].gameObject.SetActive(true);
                 }
@@ -86,12 +89,12 @@ public class SongChangeCanvas : BaseCanvas, IOpenClosePanel
     {
         SetEnable(true);
         _panel.rectTransform.anchoredPosition = new Vector2(0, -200f);
-        _panel.rectTransform.DOAnchorPosY(0f, Managers.Instance.Game.UnitTime, true);
+        _panel.rectTransform.DOAnchorPosY(0f, 0.25f, true);
     }
 
     public void ClosePanel()
     {
-        _panel.rectTransform.DOAnchorPosY(-200f, Managers.Instance.Game.UnitTime, true).OnComplete(() =>
+        _panel.rectTransform.DOAnchorPosY(-200f, 0.25f, true).OnComplete(() =>
         {
             SetEnable(false);
         });

@@ -5,5 +5,6 @@ public enum TowerType
     Guitar,
     Violin,
     Trumpet,
-    Vocal
+    Vocal,
+    Melody
 }

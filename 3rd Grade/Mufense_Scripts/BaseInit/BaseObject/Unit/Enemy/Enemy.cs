@@ -107,6 +107,16 @@ public abstract class Enemy : Unit
         }
     }
 
+    public void AddTarget()
+    {
+        Managers.Instance.Game.GetComponentInScene<CoreAttackTower>().AddTarget(this);
+    }
+
+    private void RemoveTarget()
+    {
+        Managers.Instance.Game.GetComponentInScene<CoreAttackTower>().RemoveTarget(this);
+    }
+
     #endregion
 
     #region Movement
@@ -161,10 +171,11 @@ public abstract class Enemy : Unit
 
         transform.DOLocalJump(jumpPos, 2, 1, jumpTime);
 
-        await UniTask.Delay(TimeSpan.FromSeconds(jumpTime * 0.9f));
+        await UniTask.Delay(TimeSpan.FromSeconds(jumpTime * 0.8f));
 
         if (gameObject.activeInHierarchy == false) return;
 
+        Managers.Instance.Pool.PopObject(PoolType.CoreHitEffect, transform.position);
         core.Hit(HP);
         Die();
     }
@@ -195,6 +206,8 @@ public abstract class Enemy : Unit
 
     public override void Die(InstrumentsTower attacker = null)
     {
+        RemoveTarget();
+
         DOTween.Kill(gameObject);
         DOTween.Kill(_visual.gameObject);
 
@@ -203,6 +216,8 @@ public abstract class Enemy : Unit
             Managers.Instance.Game.GetComponentInScene<MusicPowerData>().AddMusicPower(
                 Managers.Instance.Data.EnemyDatas[Type].RewardMusicPower);
         }
+
+        Managers.Instance.Game.KillCount++;
 
         base.Die(attacker);
     }

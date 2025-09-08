@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class EnemySpawnerManagement : MonoBehaviour
 {
-    private readonly float _spawnerLevelUpCooltime = 180f;
-    private readonly float _enemyLevelUpCooltime = 180f;
+    private readonly float _spawnerLevelUpCooltime = 150f;
+    private readonly float _enemyLevelUpCooltime = 150f;
 
     private float _spawnerLevelUpCooldown = 0f;
     private float _enemyLevelUpCooldown = 0f;
@@ -54,7 +54,7 @@ public class EnemySpawnerManagement : MonoBehaviour
 
         _spawnTrms = GetComponentsInChildren<Transform>().Where(x => (x != transform)).ToArray();
 
-        _spawnerLevelUpCooldown = 90f;
+        _spawnerLevelUpCooldown = 75f;
     }
 
     private void Start()

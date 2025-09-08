@@ -16,6 +16,8 @@ public class CardCanvas : BaseCanvas, IOpenClosePanel
     private Slider _timeSlider;
     private bool _isSelect = true;
 
+    private int _delayedCardSelect = 0;
+
     protected override void Init()
     {
         base.Init();
@@ -30,7 +32,7 @@ public class CardCanvas : BaseCanvas, IOpenClosePanel
         _timeSlider.value = 10f;
     }
 
-    public void ClosePanel()
+    public async void ClosePanel()
     {
         for (int i = 0; i < _cardPanels.Count; i++)
         {
@@ -39,7 +41,13 @@ public class CardCanvas : BaseCanvas, IOpenClosePanel
             rect.DOScale(0f, 0.5f);
         }
 
-        CanvasDisable().Forget();
+        await CanvasDisable();
+
+        if(_delayedCardSelect > 0)
+        {
+            _delayedCardSelect--;
+            OpenPanel();
+        }
     }
 
     private async UniTask CanvasDisable()
@@ -50,6 +58,12 @@ public class CardCanvas : BaseCanvas, IOpenClosePanel
 
     public async void OpenPanel()
     {
+        if(_isSelect == false)
+        {
+            _delayedCardSelect++;
+            return;
+        }
+
         SetEnable(true);
         CardShuffle();
 
@@ -131,7 +145,7 @@ public class CardCanvas : BaseCanvas, IOpenClosePanel
 
         for(int i = 0; i < _cardPanels.Count; i++)
         {
-            if(panel == _cardPanels[i]) continue;
+            if(panel == null || panel == _cardPanels[i]) continue;
 
             _cardPanels[i].GetComponent<RectTransform>().DOScale(0f, 0.5f);
         }
